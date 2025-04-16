@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MiniAmazon Avanzado</title>
+  <title>MiniAmazon Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Iconos: Heroicons (opcionalmente usa FontAwesome) -->
+  <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body class="bg-gray-100 font-sans">
 
@@ -17,7 +19,10 @@
       placeholder="Buscar productos..." 
       class="w-1/2 p-2 border border-gray-300 rounded"
     />
-    <button class="text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Carrito</button>
+    <button class="relative text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center" id="cartBtn">
+      <i data-feather="shopping-cart" class="mr-2"></i> Carrito
+      <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">0</span>
+    </button>
   </nav>
 
   <div class="flex">
@@ -75,6 +80,27 @@
     const productGrid = document.getElementById('productGrid');
     const categoryButtons = document.querySelectorAll('.category-btn');
     const searchInput = document.getElementById('searchInput');
+    const cartCount = document.getElementById('cartCount');
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem('cart') || '[]');
+    }
+
+    function setCart(cart) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    function updateCartCount() {
+      const cart = getCart();
+      cartCount.textContent = cart.length;
+    }
+
+    function addToCart(product) {
+      const cart = getCart();
+      cart.push(product);
+      setCart(cart);
+      updateCartCount();
+    }
 
     function renderProducts(filterCategory = 'Todos', searchQuery = '') {
       productGrid.innerHTML = '';
@@ -96,16 +122,20 @@
           <img src="${product.image}" alt="${product.name}" class="rounded mb-4">
           <h2 class="text-lg font-semibold mb-2">${product.name}</h2>
           <p class="text-gray-700 mb-2">$${product.price.toFixed(2)}</p>
-          <button class="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button class="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 add-cart-btn">
             Agregar al carrito
           </button>
         `;
+        const button = card.querySelector('.add-cart-btn');
+        button.addEventListener('click', () => addToCart(product));
         productGrid.appendChild(card);
       });
     }
 
     categoryButtons.forEach(btn => {
       btn.addEventListener('click', () => {
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('text-blue-600'));
+        btn.classList.add('text-blue-600');
         const category = btn.getAttribute('data-category');
         renderProducts(category, searchInput.value);
       });
@@ -117,8 +147,9 @@
       renderProducts(category, searchInput.value);
     });
 
-    // Inicializa con todos los productos
     renderProducts();
+    updateCartCount();
+    feather.replace(); // Para los íconos
   </script>
 
 </body>
