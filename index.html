@@ -2,16 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FenixStore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MiniAmazon Avanzado</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
 
   <!-- Navbar -->
   <nav class="bg-white shadow p-4 flex items-center justify-between">
-    <div class="text-xl font-bold text-blue-600">FenixStore</div>
+    <div class="text-xl font-bold text-blue-600">MiniAmazon</div>
     <input 
+      id="searchInput"
       type="text" 
       placeholder="Buscar productos..." 
       class="w-1/2 p-2 border border-gray-300 rounded"
@@ -19,26 +20,107 @@
     <button class="text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Carrito</button>
   </nav>
 
-  <!-- Productos -->
-  <div class="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-    
-    <!-- Producto -->
-    <div class="bg-white rounded-xl shadow p-4 flex flex-col">
-      <img src="imagenes/DHXVR1B04IV20.png" alt="Camara" class="rounded mb-4">
-      <h2 class="text-lg font-semibold mb-2">DVR de 4 CH</h2>
-      <p class="text-gray-700 mb-2">Bs 560.00</p>
+  <div class="flex">
+    <!-- Sidebar de filtros -->
+    <aside class="w-64 p-4 bg-white shadow hidden sm:block">
+      <h2 class="text-lg font-semibold mb-4">Categorías</h2>
+      <ul id="categoryList" class="space-y-2">
+        <li><button class="category-btn text-blue-600 hover:underline" data-category="Todos">Todos</button></li>
+        <li><button class="category-btn hover:underline" data-category="Electrónica">Electrónica</button></li>
+        <li><button class="category-btn hover:underline" data-category="Hogar">Hogar</button></li>
+        <li><button class="category-btn hover:underline" data-category="Cocina">Cocina</button></li>
+      </ul>
+    </aside>
 
-    </div>
-
-    <!-- Puedes duplicar este bloque para más productos -->
-    <div class="bg-white rounded-xl shadow p-4 flex flex-col">
-      <img src="imagenes/cascafrut.png" alt="Producto" class="rounded mb-4">
-      <h2 class="text-lg font-semibold mb-2">Cascafrut</h2>
-      <p class="text-gray-700 mb-2">Bs 10.00</p>
-
-    </div>
-
+    <!-- Productos -->
+    <main class="flex-1 p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="productGrid">
+      <!-- Productos se renderizan aquí -->
+    </main>
   </div>
+
+  <script>
+    const products = [
+      {
+        name: "Hervidora de Huevos",
+        price: 25.99,
+        category: "Cocina",
+        image: "https://via.placeholder.com/300x200"
+      },
+      {
+        name: "Audífonos Bluetooth",
+        price: 49.99,
+        category: "Electrónica",
+        image: "https://via.placeholder.com/300x200"
+      },
+      {
+        name: "Licuadora Portátil",
+        price: 39.99,
+        category: "Cocina",
+        image: "https://via.placeholder.com/300x200"
+      },
+      {
+        name: "Lámpara LED Recargable",
+        price: 19.99,
+        category: "Hogar",
+        image: "https://via.placeholder.com/300x200"
+      },
+      {
+        name: "Tablet Android 10\"",
+        price: 159.99,
+        category: "Electrónica",
+        image: "https://via.placeholder.com/300x200"
+      }
+    ];
+
+    const productGrid = document.getElementById('productGrid');
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const searchInput = document.getElementById('searchInput');
+
+    function renderProducts(filterCategory = 'Todos', searchQuery = '') {
+      productGrid.innerHTML = '';
+      const filtered = products.filter(product => {
+        const matchesCategory = filterCategory === 'Todos' || product.category === filterCategory;
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        productGrid.innerHTML = `<p class="col-span-full text-center text-gray-500">No se encontraron productos.</p>`;
+        return;
+      }
+
+      filtered.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow p-4 flex flex-col';
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" class="rounded mb-4">
+          <h2 class="text-lg font-semibold mb-2">${product.name}</h2>
+          <p class="text-gray-700 mb-2">$${product.price.toFixed(2)}</p>
+          <button class="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Agregar al carrito
+          </button>
+        `;
+        productGrid.appendChild(card);
+      });
+    }
+
+    categoryButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+        renderProducts(category, searchInput.value);
+      });
+    });
+
+    searchInput.addEventListener('input', () => {
+      const selectedBtn = document.querySelector('.category-btn.text-blue-600') || document.querySelector('.category-btn[data-category="Todos"]');
+      const category = selectedBtn.getAttribute('data-category');
+      renderProducts(category, searchInput.value);
+    });
+
+    // Inicializa con todos los productos
+    renderProducts();
+  </script>
 
 </body>
 </html>
+
